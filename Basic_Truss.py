@@ -212,7 +212,7 @@ def Analysis_setup(analysis, F, N = 1):
     else:
         status = 'ERROR: ANALYSIS FAILED TO CONVERGE' + '\n' + 'Tip: Change algorithm'
     
-    print(analysis + '\n' + status)
+    print(analysis + '\n' + status + '\n')
     
     # Close recorders and scrap model.
     ops.wipe()
@@ -233,4 +233,20 @@ Rec_Setup(analysis)
 
 # Step 4: Perform the analysis.
 N = 10    # Number of analysises to be performed.
+Analysis_setup(analysis, F, N)
+
+# Step 5: Initilize model parameters.
+Model_Build(x, y, A, E)
+
+# Step 6: Name the type of the analysis to be performed.
+analysis = 'Pushover'
+
+# Step 7: Set up the recorders.
+Rec_Setup(analysis)
+
+# Step 8: Perform the analysis.
+N = 10    # Number of analysises to be performed.
+
+F[3][1] = 0.0    # Perform only horizontal forces.
+
 Analysis_setup(analysis, F, N)
