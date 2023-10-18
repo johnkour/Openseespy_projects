@@ -5,13 +5,17 @@ produces the text files with:
     - the internal force of the truss element in the local system
     - the internal force of the truss element in the global system
 
+Moreover, it provides the user with the choice of calculating the P - delta
+curve using the theoretical values from the equation:
+    P = (E * A) * (h^2 * u - 1.5 * h * u^2 + 0.5 * u^3) / L^3
+
 @author: John Kouretas
 """
 
 import numpy as np
 import sys
 import openseespy.opensees as ops
-import openseespy.postprocessing.Get_Rendering as opsplt
+import opsvis as opsv
 
 
 ##############################################################################
@@ -146,7 +150,7 @@ def analysis(P, steps, tol, max_iter):
     ##########################################################################
     
     
-    opsplt.plot_model()
+    opsv.plot_model()
     
     
     ##########################################################################
@@ -233,4 +237,44 @@ solver(coords, P, A, E, steps, tol, max_iter, analysis_type)
 
 ##############################################################################
 
+# 5) Calculate and save the P - delta curve using the theoritical value of P = f(u):
 
+text = '''
+Do you want to calculate the P - delta curve using the theoretical solution?
+    If  no,     press 0.
+    If yes,     press 1.
+'''
+
+choice = input(text)
+choice = int(choice)
+
+if choice == 1:
+    
+    steps = 100
+    u_max = 3.5 * cm
+    
+    u = np.arange(steps, dtype = np.float64).reshape([steps, 1])
+    u /= steps
+    u *= u_max
+    
+    F = h**2 * u
+    F -= 1.5 * h * u**2
+    F += 0.5 * u**3
+    F *= E * A / L**3
+    F /= P[-1]
+    
+        # Save the curve in *.txt file:
+    
+    Data = np.concatenate((F, u), axis = 1)
+    Data *= -1
+    
+    path = 'Theoretical/'
+    fname = 'plotCRV'
+    fname += '.txt'
+    
+    np.savetxt(path + fname, Data, fmt = '%.8f', delimiter = ' ')
+
+elif choice != 0:
+    
+    print('ERROR: THE VALUE YOU WROTE WAS OUT OF BOUNDS')
+    sys.exit()
