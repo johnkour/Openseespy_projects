@@ -11,7 +11,7 @@ produces the text files with:
 import numpy as np
 import sys
 import openseespy.opensees as ops
-import openseespy.postprocessing.Get_Rendering as opsplt
+import opsvis as opsv
 
 
 ##############################################################################
@@ -72,7 +72,7 @@ def geom(coords):
     
         # Define the nodes:
     
-    [ops.node(i, *coords[i, :])    for i in range(len(coords))]
+    [ops.node(i + 1, *coords[i, :])    for i in range(len(coords))]
     
     
     ##########################################################################
@@ -114,9 +114,9 @@ def elements(coords, A, E, analysis_type):
     
     temp = len(coords) - 3
     for i in range(0, temp, 2):
-        eleTag = connections(member_type, A, matTag, i, eleTag)
+        eleTag = connections(member_type, A, matTag, i + 1, eleTag)
     
-    temp += 1
+    temp += 2
     ops.element(member_type, eleTag, *[temp, temp + 1], A, matTag)
     
     
@@ -129,7 +129,6 @@ def recs(coords, analysis_type):
     
     
     temp = len(coords)
-    temp -= 1
     
     ops.recorder(   'Node', '-file', analysis_type + '/' +    'plotCRV.txt', '-time', '-node', *[temp],   '-dof', *[2], 'disp')
     
@@ -139,7 +138,7 @@ def recs(coords, analysis_type):
 
     # E) Setup analysis parameters:
 
-def analysis(coords, P, steps, tol, max_iter):
+def analysis(coords, P, steps, tol, max_iter, analysis_type):
     
     
     tsTag = 1
@@ -166,13 +165,15 @@ def analysis(coords, P, steps, tol, max_iter):
     
     ops.analysis('Static')
     
+    if analysis_type != 'Linear':   steps *= 250
+    
     ops.analyze(steps)
     
     
     ##########################################################################
     
     
-    opsplt.plot_model()
+    opsv.plot_model(node_labels = 0, element_labels = 0)
     
     
     ##########################################################################
@@ -196,7 +197,7 @@ def solver(coords, P, steps, tol, max_iter, analysis_type):
     geom(coords)
     elements(coords, A, E, analysis_type)
     recs(coords, analysis_type)
-    analysis(coords, P, steps, tol, max_iter)
+    analysis(coords, P, steps, tol, max_iter, analysis_type)
 
 
 ##############################################################################
