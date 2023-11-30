@@ -18,7 +18,7 @@ elements (1, 3, 5, 10, 15, 20, 30, 50).
 
 import numpy as np
 import openseespy.opensees as ops
-import openseespy.postprocessing.Get_Rendering as opsplt
+import opsvis as opsv
 
 
 ##############################################################################
@@ -243,7 +243,7 @@ def PDelta_analysis(Nnodes, P, steps, tol, max_iter):
     ##########################################################################
     
     
-    opsplt.plot_model('nodes')
+    opsv.plot_model('nodes')
     
     
     ##########################################################################
